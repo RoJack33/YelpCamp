@@ -6,6 +6,9 @@ const ExpressError = require("../utilities/ExpressError");
 const campgrounds = require('../controllers/campgrounds')
 const Joi = require("joi");
 const {isLoggedIn} = require('../middleware');
+const multer = require("multer");
+const { storage } = require("../cloudinary");
+const upload = multer({ storage });
 
 const validateCampground = (req, res, next) => {
   // if (!req.body.campground) throw new ExpressError ('Invalid Campground Data', 400)
@@ -40,13 +43,13 @@ const isAuthor = async (req, res, next) =>{
 
 router.route('/')
   .get(wrapAsync(campgrounds.campgroundIndex))
-  .post(isLoggedIn ,validateCampground, wrapAsync(campgrounds.createCampground))
+  .post(isLoggedIn , upload.array('image'), validateCampground, wrapAsync(campgrounds.createCampground))
 
 router.get("/new", isLoggedIn, campgrounds.renderNewForm);
 
 router.route('/:id')
   .get(isLoggedIn, wrapAsync(campgrounds.showCampground))
-  .put(isLoggedIn, isAuthor, validateCampground, wrapAsync(campgrounds.updateCampground))
+  .put(isLoggedIn, isAuthor, upload.array('image'), validateCampground, wrapAsync(campgrounds.updateCampground))
   .delete(isLoggedIn, wrapAsync(campgrounds.deleteCampground))
 
 // router.get('/', wrapAsync(campgrounds.index));
