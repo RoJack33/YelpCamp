@@ -1,10 +1,10 @@
 const Campground = require("../models/campground");
 const wrapAsync = require("../utilities/wrapAsync");
 
-module.exports.campgroundIndex = wrapAsync(async(req,res) => {
+module.exports.campgroundIndex = async(req,res) => {
   const campgrounds = await Campground.find({})
   res.render('campgrounds/index.ejs', {campgrounds})
-})
+}
 
 module.exports.renderNewForm = (req,res) =>{
   res.render('campgrounds/new.ejs')
@@ -12,6 +12,10 @@ module.exports.renderNewForm = (req,res) =>{
 
 module.exports.createCampground = async (req, res) => {
   const newCampground = new Campground(req.body.campground);
+  campground.images = req.files.map(f => ({
+      url: f.path,
+      filename: f.filename,
+  }));
   newCampground.author = req.user._id;
   await newCampground.save();
   req.flash("success", "Successfully made a new campground!");
@@ -46,6 +50,9 @@ module.exports.renderEditForm = async (req, res) => {
 module.exports.updateCampground = async (req, res) => {
   const { id } = req.params;
   const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground});
+  const imgs = req.files.map((f) => ({url: f.path, filename: f.filename}));
+  campground.images.push(...imgs);
+  await campground.save();
   req.flash("success", "successfully updated campground!");
   res.redirect(`/campgrounds/${campground._id}`);
 };
