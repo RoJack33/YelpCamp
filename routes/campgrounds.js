@@ -16,10 +16,14 @@ const validateCampground = (req, res, next) => {
     campground: Joi.object({
       title: Joi.string().required(),
       price: Joi.number().required().min(0),
-      image: Joi.string().required(),
+      image: Joi.array().items(Joi.object({
+        url: Joi.string().required,
+        filename: Joi.string().required
+      })).required,
       location: Joi.string().required(),
       description: Joi.string().required(),
     }).required(),
+    deleteImages: Joi.array()
   });
   const { error } = campgroundSchema.validate(req.body);
   if (error) {
@@ -50,7 +54,7 @@ router.get("/new", isLoggedIn, campgrounds.renderNewForm);
 router.route('/:id')
   .get(isLoggedIn, wrapAsync(campgrounds.showCampground))
   .put(isLoggedIn, isAuthor, upload.array('image'), validateCampground, wrapAsync(campgrounds.updateCampground))
-  .delete(isLoggedIn, wrapAsync(campgrounds.deleteCampground))
+  .delete(isLoggedIn, isAuthor, wrapAsync(campgrounds.deleteCampground))
 
 // router.get('/', wrapAsync(campgrounds.index));
 
@@ -59,7 +63,7 @@ router.route('/:id')
 
 // router.get("/:id", isLoggedIn, wrapAsync(campgrounds.showCampground))
 
-router.get('/:id/edit', isAuthor, wrapAsync(campgrounds.renderEditForm))
+router.get('/:id/edit', isLoggedIn, isAuthor, wrapAsync(campgrounds.renderEditForm))
 
 // router.put("/:id", isLoggedIn, isAuthor, validateCampground, wrapAsync(campgrounds.updateCampground));
 
