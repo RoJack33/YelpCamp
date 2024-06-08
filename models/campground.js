@@ -17,23 +17,42 @@ imageSchema.virtual("cardImage").get(function () {
   return this.url.replace("/upload", "/upload/ar_4:3,c_crop");
 });
 
+const opts = { toJSON: { virtuals: true } };
+
 const campgroundSchema = new Schema({
   title: String,
   images: [imageSchema],
+  geometry: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+  },
   price: Number,
   description: String,
   location: String,
   author: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: "User",
   },
   review: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'Review'
-    }
-  ]
-})
+      ref: "Review",
+    },
+  ],
+});
+
+campgroundSchema.virtual("properties.popUpMarkup").get(function () {
+  return `
+    <strong><a href="/campgrounds/${this._id}">${this.title}</a><strong>
+    <p>${this.description.substring(0, 20)}...</p>`;
+});
 
 campgroundSchema.post('findOneAndDelete', async function (doc){
   if(doc){

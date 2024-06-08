@@ -52,6 +52,7 @@
     </div>
   </div>
   <div class="col-6">
+    <div id="map"></div>
     <% if (currentUser) { %>
     <h2>Leave A Review</h2>
       <form action="/campgrounds/<%= campgrounds._id %>/reviews" method="POST" class="mb-3 validated-form" novalidate>
@@ -99,6 +100,12 @@
       <% } %>
   </div>
 </div>
+
+<script>
+  const campgrounds = <%- JSON.stringify(campgrounds) %>
+</script>
+
+<script src="/javascripts/showPageMap.js"></script>
 
 <!-- <h1><%= campgrounds.title %></h1>
 <h1><%= campgrounds.location %></h1>
